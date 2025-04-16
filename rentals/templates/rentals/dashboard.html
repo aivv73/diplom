@@ -1,0 +1,125 @@
+{% extends "rentals/home.html" %}
+{% block content %}
+<div class="container">
+    <h2>Личный кабинет</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if overdue_bookings %}
+    <div class="alert alert-danger">
+        <h4>Просроченные возвраты!</h4>
+        <p>Пожалуйста, верните эти автомобили как можно скорее, чтобы избежать дополнительных начислений:</p>
+        <ul>
+            {% for booking in overdue_bookings %}
+            <li>
+                {{ booking.car.brand }} {{ booking.car.name }} — 
+                Дата возврата: {{ booking.end_date }}
+                (просрочено на {{ booking.end_date|timeuntil }})
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    {% if return_today %}
+    <div class="alert alert-warning">
+        <h4>Возврат сегодня!</h4>
+        <p>Следующие автомобили необходимо вернуть сегодня:</p>
+        <ul>
+            {% for booking in return_today %}
+            <li>
+                {{ booking.car.brand }} {{ booking.car.name }} — 
+                Пункт возврата: {{ booking.return_location }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <h3>Текущие аренды</h3>
+    {% if active_bookings %}
+    <div class="row">
+        {% for booking in active_bookings %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.car.brand }} {{ booking.car.name }}</h5>
+                    <p>Дата начала: {{ booking.start_date }}</p>
+                    <p>Вернуть до: {{ booking.end_date }}</p>
+                    <p>Пункт возврата: {{ booking.return_location }}</p>
+                    <p>Сумма: {{ booking.total_price }} ₽</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>У вас нет активных аренд.</p>
+    {% endif %}
+    
+    <h3>Будущие бронирования</h3>
+    {% if upcoming_bookings %}
+    <div class="row">
+        {% for booking in upcoming_bookings %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.car.brand }} {{ booking.car.name }}</h5>
+                    <p>Начало: {{ booking.start_date }}</p>
+                    <p>Возврат: {{ booking.end_date }}</p>
+                    <p>Пункт выдачи: {{ booking.pickup_location }}</p>
+                    <p>Пункт возврата: {{ booking.return_location }}</p>
+                    <p>Сумма: {{ booking.total_price }} ₽</p>
+                    
+                    <!-- Кнопка отмены бронирования -->
+                    <form action="{% url 'cancel_booking' booking.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите отменить бронирование?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Отменить бронирование</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>У вас нет будущих бронирований.</p>
+    {% endif %}
+    
+    <h3>Прошлые аренды</h3>
+    {% if past_bookings %}
+    <div class="row">
+        {% for booking in past_bookings %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.car.brand }} {{ booking.car.name }}</h5>
+                    <p>Период: {{ booking.start_date }} — {{ booking.end_date }}</p>
+                    <p>Сумма: {{ booking.total_price }} ₽</p>
+                    <p>Статус: 
+                        {% if booking.is_returned %}
+                        <span class="badge bg-success">Возвращено</span>
+                        {% if booking.actual_return_date %}
+                        ({{ booking.actual_return_date }})
+                        {% endif %}
+                        {% else %}
+                        <span class="badge bg-danger">Не возвращено</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>У вас нет прошлых аренд.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "rentals/home.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Бронирование {{ car.brand }} {{ car.name }}</h2>
+    <p>Цена за сутки: {{ car.price_per_day }} ₽</p>
+    
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="id_pickup_location" class="form-label">{{ form.pickup_location.label }}</label>
+                {{ form.pickup_location }}
+            </div>
+            <div class="col-md-6">
+                <label for="id_return_location" class="form-label">{{ form.return_location.label }}</label>
+                {{ form.return_location }}
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="id_start_date" class="form-label">{{ form.start_date.label }}</label>
+                {{ form.start_date }}
+            </div>
+            <div class="col-md-6">
+                <label for="id_end_date" class="form-label">{{ form.end_date.label }}</label>
+                {{ form.end_date }}
+            </div>
+        </div>
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="alert alert-info">
+            <strong>Внимание:</strong> Возврат автомобиля в другом пункте может повлечь дополнительную плату.
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Забронировать</button>
+        <a href="{% url 'car_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "rentals/home.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Доступные автомобили</h2>
+    
+    <!-- Форма поиска -->
+    <form method="get" action="{% url 'car_list' %}" class="bg-light p-3 mb-4 rounded">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">{{ form.brand.label }}</label>
+                {{ form.brand }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">{{ form.category.label }}</label>
+                {{ form.category }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">{{ form.transmission.label }}</label>
+                {{ form.transmission }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Мин. цена (₽)</label>
+                {{ form.min_price }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Макс. цена (₽)</label>
+                {{ form.max_price }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Мин. количество мест</label>
+                {{ form.min_seats }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Поиск</button>
+                <a href="{% url 'car_list' %}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </div>
+    </form>
+    
+    <div class="row">
+        {% for car in cars %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if car.image %}
+                <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.brand }} {{ car.name }}">
+                {% else %}
+                <div class="card-img-top bg-light text-center py-5">Нет фото</div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ car.brand }} {{ car.name }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            {{ car.year }} • {{ car.transmission|title }} • {{ car.fuel_type }}
+                        </small>
+                    </p>
+                    <p class="card-text">{{ car.description|truncatewords:15 }}</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">Мест: {{ car.seats }}</li>
+                        <li class="list-group-item">Пробег: {{ car.mileage|default:"Н/Д" }}</li>
+                        <li class="list-group-item">Категория: {{ car.category|title|default:"Н/Д" }}</li>
+                    </ul>
+                    <h6 class="card-subtitle mb-2 text-primary">{{ car.price_per_day }} ₽ в сутки</h6>
+                    <a href="{% url 'car_detail' car.id %}" class="btn btn-primary me-2">Подробнее</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'book_car' car.id %}" class="btn btn-success">Забронировать</a>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'book_car' car.id %}" class="btn btn-outline-secondary" title="Войдите, чтобы забронировать">Войти для бронирования</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Нет автомобилей, соответствующих вашему запросу. Попробуйте изменить фильтры.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
